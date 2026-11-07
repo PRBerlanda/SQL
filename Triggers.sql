@@ -1,3 +1,7 @@
+USE insight_places;
+
+drop trigger if exists AtualizarResumoAluguel;
+
 delimiter $$
 
 create trigger AtualizarResumoAluguel
@@ -7,7 +11,7 @@ begin
 	declare desconto int;
     declare valorFinal decimal(10,2);
     set desconto = CalcularDescontoPorDias(new.aluguel_id);
-    set valorFinal = CalcularValorComDesconto(new.cliente_id);
+    set valorFinal = CalcularValorComDesconto(new.aluguel_id);
     
     insert into resumo_aluguel(
     aluguel_id,

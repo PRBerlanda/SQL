@@ -1,3 +1,5 @@
+USE insight_places;
+
 select avg(nota), tipo
 from avaliacoes a
 join hospedagens h
@@ -51,6 +53,8 @@ from avaliacoes;
 
 -- Criar novas funções customizaveis
 
+drop function if exists retornoConstante;
+
 delimiter $$
 create function retornoConstante()
 returns varchar(200) deterministic
@@ -63,7 +67,7 @@ delimiter ;
 
 select retornoConstante();
 
-drop function insight_places.MediaAvaliacoes;
+drop function if exists insight_places.MediaAvaliacoes;
 
 delimiter $$
 create function MediaAvaliacoes()
@@ -80,6 +84,8 @@ end $$
 delimiter ;
 
 select MediaAvaliacoes();
+
+drop function if exists calcularOcupacaoMedia;
 
 delimiter $$
 create function calcularOcupacaoMedia() -- Cria função com algum nome
@@ -99,6 +105,8 @@ end $$
 delimiter ;
 
 select calcularOcupacaoMedia();
+
+drop function if exists FormatandoCPF;
 
 delimiter $$
 create function FormatandoCPF(clienteID int)
@@ -123,16 +131,18 @@ delimiter ;
 
 select trim(nome), cpf, formatandoCPF(1) as cpf from clientes where cliente_id = 1;
 
+drop function if exists InfoAluguel;
+
 delimiter $$ -- Entrada do novo delimitador
 create function InfoAluguel(idAluguel int) -- nome da função e o input que é o aluguel_id
-returns varchar(50) deterministic -- retorna um texto
+returns varchar(200) deterministic -- retorna um texto
 begin -- inicia a função
 
 declare nomeCliente varchar(100); -- atribui a variável o output c.nome do select
 declare precoTotal decimal(10,2); -- atribui a variável o output a.preco_total do select
 declare dias int; -- int do datediff entre as datas
 declare valorDiaria decimal(10,2); -- Divisão do precoTotal e dias
-declare resultado varchar(55); -- Variável Output da função (concatenação dos valores)
+declare resultado varchar(200); -- Variável Output da função (concatenação dos valores)
     
     -- Serve para buscar as informações do aluguel_id que será dado como input
     select c.nome, a.preco_total, datediff(data_fim, data_inicio)
@@ -153,10 +163,11 @@ delimiter ;
 
 select InfoAluguel(10000);
 
-drop function insight_places.tipoHospedagem
+drop function if exists insight_places.TipoHospedagem;
+
 delimiter $$
 create function TipoHospedagem(tipoHospedagem varchar(50))
-returns varchar(50) deterministic
+returns varchar(200) deterministic
 begin
 declare tipoImovel varchar(50);
 declare ImoveisAtivos int;
@@ -173,23 +184,26 @@ delimiter ;
 
 select TipoHospedagem('Casa');
 
-DELIMITER $$
-CREATE FUNCTION nome_da_funcao (-- parametro1 tipo, parametro2 tipo, ... )
-RETURNS tipo
-BEGIN
-DECLARE nome_variavel tipo;
-DECLARE nome_variavel tipo DEFAULT valor_inicial;
-    -- Corpo da função: instruções SQL e lógica da função
-    RETURN valor;
-END$$
-DELIMITER;
+-- Modelo de sintaxe (não executar):
+-- DELIMITER $$
+-- CREATE FUNCTION nome_da_funcao (-- parametro1 tipo, parametro2 tipo, ... )
+-- RETURNS tipo
+-- BEGIN
+-- DECLARE nome_variavel tipo;
+-- DECLARE nome_variavel tipo DEFAULT valor_inicial;
+--     -- Corpo da função: instruções SQL e lógica da função
+--     RETURN valor;
+-- END$$
+-- DELIMITER;
+-- 
+-- CREATE FUNCTION funcao (parametro1 int, parametro2 varchar)
+-- RETURNS float
+-- 	BEGIN
+-- 		DECLARE variavel INT DEFAULT valor
+-- 	RETURN expressao;
+-- END;
 
-CREATE FUNCTION funcao (parametro1 int, parametro2 varchar)
-RETURNS float
-	BEGIN
-		DECLARE variavel INT DEFAULT valor
-	RETURN expressao;
-END;
+drop function if exists CalcularDescontoPorDias;
 
 delimiter $$
 create function CalcularDescontoPorDias (AluguelID int)
@@ -212,9 +226,11 @@ delimiter ;
 
 select CalcularDescontoPorDias(1);
 
+DROP FUNCTION IF EXISTS CalcularValorFinalComDesconto;
+
 DELIMITER $$
 
-CREATE FUNCTION CalcularValorFinalComDesconto()
+CREATE FUNCTION CalcularValorFinalComDesconto(AluguelID INT)
 RETURNS DECIMAL(10,2) DETERMINISTIC
 
 BEGIN
@@ -232,6 +248,8 @@ DELIMITER ;
 
 select CalcularValorFinalComDesconto(77);
 
+drop function if exists calculaMediaEstadia;
+
 delimiter $$
 create function calculaMediaEstadia()
 returns int deterministic
@@ -243,6 +261,8 @@ end $$
 delimiter ;
 
 select calculaMediaEstadia();
+
+drop function if exists CalcularValorComDesconto;
 
 delimiter $$
 create function CalcularValorComDesconto(aluguelID int)
@@ -267,7 +287,7 @@ delimiter ;
 
 select CalcularValorComDesconto(1);
 
-create table resumo_aluguel (
+create table if not exists resumo_aluguel (
 aluguel_id varchar(255),
 cliente_id varchar(255),
 valortotal decimal(10,2),

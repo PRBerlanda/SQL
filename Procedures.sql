@@ -1,7 +1,6 @@
 
 USE `insight_places`;
 DROP procedure IF EXISTS `insight_places`.`novoAluguel_22`;
-;
 
 DELIMITER $$
 USE `insight_places`$$
@@ -18,7 +17,6 @@ BEGIN
 END$$
 
 DELIMITER ;
-;
 
 select * from alugueis where aluguel_id = '10001';
 
@@ -26,7 +24,6 @@ call novoAluguel_22;
 
 USE `insight_places`;
 DROP procedure IF EXISTS `insight_places`.`novoAluguel_23`;
-;
 
 DELIMITER $$
 USE `insight_places`$$
@@ -43,7 +40,6 @@ BEGIN
 END$$
 
 DELIMITER ;
-;
 
 call novoAluguel_23('10002', '1003', '8635', '2023-03-06', '2023-03-10', 600);
 
@@ -51,7 +47,6 @@ select * from alugueis where aluguel_id = '10002';
 
 USE `insight_places`;
 DROP procedure IF EXISTS `insight_places`.`novoAluguel_24`;
-;
 
 DELIMITER $$
 USE `insight_places`$$
@@ -72,7 +67,6 @@ BEGIN
 END$$
 
 DELIMITER ;
-;
 
 call novoAluguel_24('10004', '1004', '8635', '2023-03-13', '2023-03-16', 40);
 
@@ -82,7 +76,6 @@ select * from alugueis where aluguel_id = '10004';
 
 USE `insight_places`;
 DROP procedure IF EXISTS `insight_places`.`novoAluguel_25`;
-;
 
 DELIMITER $$
 USE `insight_places`$$
@@ -106,12 +99,11 @@ BEGIN
     set vPrecoTotal = vDias * vPrecoUnitario;
     insert into alugueis values( vAluguel, vCliente, vHospedagem,
     vDataInicio, vDataFinal, vPrecoTotal );
-    set vMEnsagem = 'Aluguel incluso com sucesso';
+    set vMensagem = 'Aluguel incluso com sucesso';
     select vMensagem;
 END$$
 
 DELIMITER ;
-;
 
 call novoAluguel_25('10005', '1005', '8635', '2023-03-17', '2023-03-25', 40);
 
@@ -119,7 +111,6 @@ select * from alugueis where aluguel_id = '10005';
 
 USE `insight_places`;
 DROP procedure IF EXISTS `insight_places`.`novoAluguel_27`;
-;
 
 DELIMITER $$
 USE `insight_places`$$
@@ -145,7 +136,7 @@ BEGIN
 	if vNumCliente > 1 then
 		set vMensagem = "Há mais de um cliente com o mesmo nome";
         select vMensagem;
-	elseif vNumCLiente = 0 then
+	elseif vNumCliente = 0 then
 		set vMensagem = "Cliente não existe na base de dados";
         select vMensagem;
     else
@@ -164,7 +155,6 @@ call novoAluguel_27('10007', 'Paulo Ricardo', '8635', '2023-03-19', '2023-03-30'
 
 USE `insight_places`;
 DROP procedure IF EXISTS `insight_places`.`novoAluguel_28`;
-;
 
 DELIMITER $$
 USE `insight_places`$$
@@ -192,9 +182,6 @@ BEGIN
 		set vMensagem = "Cliente não existe na base de dados";
         select vMensagem;
 	when 1 then
-		set vMensagem = "Há mais de um cliente com o mesmo nome";
-        select vMensagem;
-	else
         set vDias = (select datediff(vDataFinal, vDataInicio));
 		set vPrecoTotal = vDias * vPrecoUnitario;
 		select cliente_id into vCliente from clientes where nome = vClienteNome;
@@ -202,6 +189,9 @@ BEGIN
 		vDataInicio, vDataFinal, vPrecoTotal );
 		set vMensagem = 'Aluguel incluso com sucesso';
 		select vMensagem;
+	else
+		set vMensagem = "Há mais de um cliente com o mesmo nome";
+        select vMensagem;
     end case;
 END$$
 DELIMITER ;
@@ -209,7 +199,6 @@ DELIMITER ;
 
 USE `insight_places`;
 DROP procedure IF EXISTS `insight_places`.`novoAluguel_29`;
-;
 
 DELIMITER $$
 USE `insight_places`$$
@@ -236,10 +225,10 @@ BEGIN
     when vNumCliente = 0 then
 		set vMensagem = "Cliente não existe na base de dados";
         select vMensagem;
-	when vNumCliente = 1 then
+	when vNumCliente > 1 then
 		set vMensagem = "Há mais de um cliente com o mesmo nome";
         select vMensagem;
-	when vNumCliente > 1 then
+	when vNumCliente = 1 then
         set vDias = (select datediff(vDataFinal, vDataInicio));
 		set vPrecoTotal = vDias * vPrecoUnitario;
 		select cliente_id into vCliente from clientes where nome = vClienteNome;
@@ -253,7 +242,6 @@ DELIMITER ;
 
 USE `insight_places`;
 DROP procedure IF EXISTS `insight_places`.`novoAluguel_30`;
-;
 
 DELIMITER $$
 USE `insight_places`$$
@@ -266,7 +254,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `novoAluguel_30`
 	vPrecoUnitario decimal(10,2))
 BEGIN
 	declare vCliente varchar(10);
-	declare vDataFinal integer default 0;
+	declare vDataFinal date;
     declare vNumCliente integer;
     declare vPrecoTotal decimal(10,2);
     declare vMensagem VARCHAR(100);
@@ -300,7 +288,6 @@ select * from alugueis where aluguel_id = '10008';
 
 USE `insight_places`;
 DROP procedure IF EXISTS `insight_places`.`novoAluguel_31`;
-;
 
 DELIMITER $$
 USE `insight_places`$$
@@ -360,7 +347,6 @@ select * from alugueis where aluguel_id = '10009';
 
 USE `insight_places`;
 DROP procedure IF EXISTS `insight_places`.`novoAluguel_33`;
-;
 
 DELIMITER $$
 USE `insight_places`$$
@@ -408,7 +394,6 @@ select * from alugueis where aluguel_id = '10010';
 
 USE `insight_places`;
 DROP procedure IF EXISTS `insight_places`.`novoAluguel_34`;
-;
 
 DELIMITER $$
 USE `insight_places`$$
@@ -451,7 +436,6 @@ DELIMITER ;
 
 USE `insight_places`;
 DROP procedure IF EXISTS `insight_places`.`novoAluguel_36`;
-;
 
 DELIMITER $$
 USE `insight_places`$$
@@ -507,7 +491,6 @@ call looping_cursor();
 
 USE `insight_places`;
 DROP procedure IF EXISTS `insight_places`.`novosAluguesComLoopCursor`;
-;
 
 DELIMITER $$
 USE `insight_places`$$
@@ -538,7 +521,6 @@ BEGIN
 END$$
 
 DELIMITER ;
-;
 
 call novosAluguesComLoopCursor('Gabriel Carvalho,Erick Oliveira,Catarina Correia,Lorena Jesus','8635','2023-04-28',6,40);
-select * from alugueis where aluguel_id IN ('10012','10013','10014','10015')
+select * from alugueis where aluguel_id IN ('10012','10013','10014','10015');

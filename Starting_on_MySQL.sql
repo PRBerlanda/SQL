@@ -34,7 +34,7 @@ select * from produtos;
 select * from produtos
 where preco between 80 and 250;
 
-select * from produtosclientes
+select * from produtos
 where estoque > 30;
 
 select * from produtos
@@ -112,7 +112,7 @@ select * from livros order by id;
 select * from comentarios;
 SELECT * FROM comentarios LIMIT 5000;
 
-drop table comentarios;
+-- drop table comentarios;  -- comentado: as views e a procedure abaixo usam essa tabela
 
 -- buscar todos os livros publicados após o ano 2010 
 select nome from livros

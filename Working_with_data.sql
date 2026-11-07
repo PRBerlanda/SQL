@@ -1,3 +1,5 @@
+USE insight_places;
+
 SELECT
     (SELECT COUNT(*) FROM proprietarios) AS total_proprietarios,
     (SELECT COUNT(*) FROM clientes) AS total_clientes,
@@ -19,8 +21,6 @@ order by taxa_ocupacao asc;
 select * from proprietarios;
 
 select * from hospedagens;
-
-USE insight_places;
 
 SELECT p.nome AS proprietarios, 
 COUNT(DISTINCT h.hospedagem_id) AS hospedagens 
@@ -153,8 +153,9 @@ GROUP BY
     ano, mes
 order by ano, mes asc;
 
-delimiter $$
 drop procedure if exists alugueis_por_regiao;
+
+delimiter $$
 create procedure alugueis_por_regiao(nome_regiao varchar(255))
 begin
 SELECT
@@ -218,7 +219,7 @@ delimiter ;
 
 call taxa_ocupacao("21");
 
-create view metricas_proprietario as
+create or replace view metricas_proprietario as
 	SELECT 
 	p.nome AS proprietarios, 
 	min(primeira_data) as primeira_data,
