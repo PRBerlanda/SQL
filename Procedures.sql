@@ -345,6 +345,89 @@ call novoAluguel_31('10009', 'Rafael Peixoto', '8635', '2023-04-10', 14, 120);
 select * from alugueis where aluguel_id = '10009';
 
 
+-- =====================================================================================
+-- Procedures auxiliares usadas a partir da novoAluguel_33.
+-- Elas foram criadas durante o curso, mas não estavam salvas neste arquivo; foram
+-- reconstruídas a partir de como são chamadas e da lógica da novoAluguel_31.
+-- =====================================================================================
+
+-- Calcula a data final contando apenas dias úteis (segunda a sexta), a partir da data inicial.
+-- Mesma lógica do loop WHILE da novoAluguel_31, agora reaproveitável: vDataFinal é parâmetro de saída.
+USE `insight_places`;
+DROP procedure IF EXISTS `insight_places`.`calculaDataFinal_01`;
+
+DELIMITER $$
+USE `insight_places`$$
+CREATE PROCEDURE `calculaDataFinal_01`
+(	vDataInicio date,
+	OUT vDataFinal date,
+	vDias integer)
+BEGIN
+	declare vContador integer;
+	declare vDiaSemana integer;
+	set vContador = 1;
+	set vDataFinal = vDataInicio;
+	while vContador < vDias
+	do
+		set vDiaSemana = dayofweek(vDataFinal); -- 1 = domingo, 7 = sábado
+		if vDiaSemana <> 7 and vDiaSemana <> 1 then
+			set vContador = vContador + 1;
+		end if;
+		set vDataFinal = vDataFinal + interval 1 day;
+	end while;
+END$$
+DELIMITER ;
+
+-- Teste: 5 diárias a partir de sábado, 01/04/2023
+set @dataFinal = null;
+call calculaDataFinal_01('2023-04-01', @dataFinal, 5);
+select @dataFinal as data_final;
+
+-- Calcula o preço total (diárias x preço unitário) e inclui o aluguel.
+-- Não tem handler próprio: um erro de chave estrangeira (1452) sobe para o handler
+-- da procedure que a chamou (novoAluguel_34 / novoAluguel_36).
+USE `insight_places`;
+DROP procedure IF EXISTS `insight_places`.`calcula_preco_total`;
+
+DELIMITER $$
+USE `insight_places`$$
+CREATE PROCEDURE `calcula_preco_total`
+(	vAluguel varchar(10),
+	vCliente varchar(10),
+	vHospedagem varchar(10),
+	vDataInicio date,
+	vDataFinal date,
+	vDias integer,
+	vPrecoUnitario decimal(10,2))
+BEGIN
+	declare vPrecoTotal decimal(10,2);
+	set vPrecoTotal = vDias * vPrecoUnitario;
+	insert into alugueis values (vAluguel, vCliente, vHospedagem,
+		vDataInicio, vDataFinal, vPrecoTotal);
+END$$
+DELIMITER ;
+
+-- Primeira versão da inclusão separada em procedure (usada pela novoAluguel_34).
+-- Mesma assinatura da calcula_preco_total, para a qual apenas repassa os parâmetros.
+USE `insight_places`;
+DROP procedure IF EXISTS `insight_places`.`inclusao_cliente_43`;
+
+DELIMITER $$
+USE `insight_places`$$
+CREATE PROCEDURE `inclusao_cliente_43`
+(	vAluguel varchar(10),
+	vCliente varchar(10),
+	vHospedagem varchar(10),
+	vDataInicio date,
+	vDataFinal date,
+	vDias integer,
+	vPrecoUnitario decimal(10,2))
+BEGIN
+	call calcula_preco_total(vAluguel, vCliente, vHospedagem,
+		vDataInicio, vDataFinal, vDias, vPrecoUnitario);
+END$$
+DELIMITER ;
+
 USE `insight_places`;
 DROP procedure IF EXISTS `insight_places`.`novoAluguel_33`;
 
@@ -479,6 +562,58 @@ DELIMITER ;
 
 call novoAluguel_36( 'Rafael Peixoto', '8635', '2023-04-01', 5, 120);
 select * from alugueis where aluguel_id = '10011';
+
+-- Procedures auxiliares para a inclusão em lote (reconstruídas, ver nota acima):
+-- inclui_usuarios_lista separa uma lista de nomes separados por vírgula e grava cada nome
+-- na tabela temporária temp_nomes (criada por quem chama); looping_cursor percorre essa
+-- tabela com um cursor e exibe cada nome.
+USE `insight_places`;
+DROP procedure IF EXISTS `insight_places`.`inclui_usuarios_lista`;
+
+DELIMITER $$
+USE `insight_places`$$
+CREATE PROCEDURE `inclui_usuarios_lista`(lista varchar(255))
+BEGIN
+	declare vNome varchar(255);
+	declare vRestante varchar(255);
+	declare vPosicao integer;
+	set vRestante = lista;
+	while char_length(vRestante) > 0 do
+		set vPosicao = locate(',', vRestante);
+		if vPosicao = 0 then
+			set vNome = vRestante;
+			set vRestante = '';
+		else
+			set vNome = substring(vRestante, 1, vPosicao - 1);
+			set vRestante = substring(vRestante, vPosicao + 1);
+		end if;
+		if char_length(trim(vNome)) > 0 then
+			insert into temp_nomes (nome) values (trim(vNome));
+		end if;
+	end while;
+END$$
+DELIMITER ;
+
+USE `insight_places`;
+DROP procedure IF EXISTS `insight_places`.`looping_cursor`;
+
+DELIMITER $$
+USE `insight_places`$$
+CREATE PROCEDURE `looping_cursor`()
+BEGIN
+	declare fimCursor integer default 0;
+	declare vNome varchar(255);
+	declare cursor1 cursor for select nome from temp_nomes;
+	declare continue handler for not found set fimCursor = 1;
+	open cursor1;
+	fetch cursor1 into vNome;
+	while fimCursor = 0 do
+		select vNome as nome;
+		fetch cursor1 into vNome;
+	end while;
+	close cursor1;
+END$$
+DELIMITER ;
 
 -- tempo_nomes(nome)
 
